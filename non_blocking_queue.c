@@ -73,7 +73,7 @@ int non_blocking_queue_pop(NonBlockingQueueT* queue, unsigned int* value) {
   
   //if queue is now empty, reset rear aswell
   if(queue->front == NULL){
-    queue->rear == NULL;
+    queue->rear = NULL;
   }
   //free previous front
   checked_free(prevFront);

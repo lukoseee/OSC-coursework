@@ -5,5 +5,6 @@
 
 void event_source_start(useconds_t interval);
 void event_source_stop();
+int check_termination();
 
 #endif
