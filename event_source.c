@@ -2,14 +2,14 @@
 #include "utilities.h"
 #include "simulator.h"
 
-int terminate;
+int terminate; //global variable to keep track of whether event source has ended 
 static pthread_t event_thread; //threads
 static pthread_mutex_t event_lock;
 
 void event_source_start(useconds_t interval) {
   terminate = 0;
   
-  //pass interval as arguement to simulator_event
+  //pass interval as argument to simulator_event
   pthread_create(&event_thread, NULL, simulator_event, &interval);
   
 }

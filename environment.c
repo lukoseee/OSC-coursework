@@ -27,7 +27,7 @@ void *terminating_routine(void *arg){
     ProcessIdT pids[batch];
     
     for(int y=0; y<batch; y++){ //loop through batch
-
+      //create process using code 
       pids[y] = simulator_create_process(code);
       
     }
@@ -39,7 +39,6 @@ void *terminating_routine(void *arg){
        
         simulator_wait(pids[j]);
        }
-       
     }
   }
   
@@ -91,11 +90,6 @@ void *infinite_routine(void *arg){
     for(int y=0; y<batch; y++){ //loop through batch
 
       pids[y] = simulator_create_process(code);
-      
-    }
-    
-    for(int y=0; y<batch; y++){ //loop through batch
-
       simulator_kill(pids[y]);
       
     }
@@ -107,8 +101,8 @@ void *infinite_routine(void *arg){
        
         simulator_wait(pids[j]);
        }
-       
     }
+    
   }
   
   //printf("thread exiting\n");
@@ -122,9 +116,11 @@ void environment_start(unsigned int thread_count, unsigned int iterations,unsign
   count = thread_count;
   iters = iterations;
   batch = batch_size;
+  
   threads = (pthread_t*)checked_malloc(thread_count * sizeof(pthread_t));
   blocking_threads = (pthread_t*)checked_malloc(thread_count * sizeof(pthread_t));
   infinite_threads = (pthread_t*)checked_malloc(thread_count * sizeof(pthread_t));
+  
   thread_ids = (int*)checked_malloc(thread_count * sizeof(int));
   blocking_thread_ids = (int*)checked_malloc(thread_count * sizeof(int));
   infinite_thread_ids = (int*)checked_malloc(thread_count * sizeof(int));
@@ -136,8 +132,10 @@ void environment_start(unsigned int thread_count, unsigned int iterations,unsign
     infinite_thread_ids[i] = i+1;
     pthread_create( (&threads[i]), NULL, terminating_routine, &thread_ids[i] );
     pthread_create( (&blocking_threads[i]), NULL, blocking_routine, &blocking_thread_ids[i]);
-    pthread_create( (&infinite_threads[i]), NULL, blocking_routine, &infinite_thread_ids[i]);
+    pthread_create( (&infinite_threads[i]), NULL, infinite_routine, &infinite_thread_ids[i]);
+    
   }
+
 }
 
 void environment_stop() {
@@ -152,14 +150,16 @@ void environment_stop() {
     }
     
     if (pthread_join(infinite_threads[i], NULL) != 0) {
-        perror("Failed to join blocking thread");
+        perror("Failed to join infinite thread");
     }
   }
  
   checked_free(threads);
-  checked_free(blocking_threads);
   checked_free(thread_ids);
+  
+  checked_free(blocking_threads);
   checked_free(blocking_thread_ids);
+  
   checked_free(infinite_thread_ids);
   checked_free(infinite_threads);
   

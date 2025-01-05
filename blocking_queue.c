@@ -8,10 +8,9 @@ void blocking_queue_terminate(BlockingQueueT* queue) {
   pthread_mutex_lock(&queue->lock);
   queue->terminated = 1;
   
- 
+  //post to signal wait
   sem_post(&queue->queue_sem);
   
-
   pthread_mutex_unlock(&queue->lock);
 }
 
@@ -28,10 +27,9 @@ void blocking_queue_create(BlockingQueueT* queue) {
 
 void blocking_queue_destroy(BlockingQueueT* queue) {
 
-  if (queue == NULL) return; // Guard against NULL queue
+  if (queue == NULL) return; // guard against NULL queue
   
-  pthread_mutex_lock(&queue->lock); // Lock the mutex
-  //printf("Acquired lock on queue\n");
+  pthread_mutex_lock(&queue->lock); // lock the mutex
   
   ListT* current = queue->front;
   while (current != NULL) {
@@ -41,8 +39,8 @@ void blocking_queue_destroy(BlockingQueueT* queue) {
   }
   queue->front = queue->rear = NULL;
 
-  pthread_mutex_unlock(&queue->lock); // Unlock the mutex
-  pthread_mutex_destroy(&queue->lock); // Destroy the mutex
+  pthread_mutex_unlock(&queue->lock); // unlock the mutex
+  pthread_mutex_destroy(&queue->lock); // destroy the mutex
   
   //free semaphore
   sem_destroy(&queue->queue_sem); 
@@ -52,7 +50,7 @@ void blocking_queue_destroy(BlockingQueueT* queue) {
 void blocking_queue_push(BlockingQueueT* queue, unsigned int value) {
   //lock mutex
   pthread_mutex_lock(&queue->lock);
-  //printf("Acquired lock on queue\n");
+  
   //safe memory alloc
   ListT* new_node = (ListT*)checked_malloc(sizeof(ListT));
   
@@ -82,7 +80,7 @@ int blocking_queue_pop(BlockingQueueT* queue, unsigned int* value) {
   
   pthread_mutex_lock(&queue->lock);
   
-  // If the queue is terminated and still empty, return failure
+  // if the queue is terminated and still empty, return failure
   if ( (queue->terminated == 1) && (blocking_queue_empty(queue)) ) {
       //unlock
       pthread_mutex_unlock(&queue->lock);
@@ -93,10 +91,8 @@ int blocking_queue_pop(BlockingQueueT* queue, unsigned int* value) {
    // If the queue is empty, block until an item is pushed
    while (blocking_queue_empty(queue) && !queue->terminated) {
     
-    
     // unlock the mutex before waiting on the semaphore
     pthread_mutex_unlock(&queue->lock);
-    
     
     // block and wait for a signal that an item is available in the queue
     sem_wait(&queue->queue_sem);  // wait on the semaphore

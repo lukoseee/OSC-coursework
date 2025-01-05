@@ -34,5 +34,6 @@ void simulator_kill(ProcessIdT pid);
 void *simulator_event(void *arg);
 void *simulator_routine(void *arg);
 void print_evaluator_result(EvaluatorResultT result);
+void formatted_logger(int id, const char* message);
 
 #endif
